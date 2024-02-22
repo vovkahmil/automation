@@ -1,27 +1,15 @@
-// @ts-check
-const { test, expect } = require('@playwright/test');
-const { Login } = require('../pageObject/login.page');
-const { Navigation } = require('../pageObject/Navigation.js');
-const { Projects } = require('../pageObject/Projects');
-const { users } = require('../testData/loginData');
+import { test, expect } from '@playwright/test';
+import { setupBeforeEachAdmin } from '../setup/setup';
+import { instantiatePageObjects } from '../pageObject/pageObjects';
 
 test.describe('verify login functionality', () => {
-  let login;
-  let navigation;
-  let projects;
-
   test.beforeEach(async ({ page }) => {
-    login = new Login(page);
-    navigation = new Navigation(page);
-    projects = new Projects(page);
-    await login.goto();
-    await login.clickAcceptButton();
-    await login.fillEmailField(users[0].email);
-    await login.fillPasswordField(users[0].password);
-    await login.clickLoginButton();
+    await setupBeforeEachAdmin({ page });
   });
 
   test('remove in progress project', async ({ page }) => {
+    const { navigation, projects } = instantiatePageObjects(page);
+
     await navigation.goToProjectPage();
     await projects.clickInProgressTab();
 
@@ -33,9 +21,6 @@ test.describe('verify login functionality', () => {
     await projects.clickDeleteProjectButton();
 
     await projects.clickInProgressTab();
-    await expect(projects.projectsTile).toHaveCount(projectsAmount - 1)
-  })
-
-})
-
-
+    await expect(projects.projectsTile).toHaveCount(projectsAmount - 1);
+  });
+});
